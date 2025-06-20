@@ -1,0 +1,55 @@
+--[[
+░██████╗░██╗░░░██╗░█████╗░░█████╗░██╗░░██╗  ░██████╗████████╗██╗░░░██╗██████╗░██╗░█████╗░░██████╗
+██╔═══██╗██║░░░██║██╔══██╗██╔══██╗██║░██╔╝  ██╔════╝╚══██╔══╝██║░░░██║██╔══██╗██║██╔══██╗██╔════╝
+██║██╗██║██║░░░██║███████║██║░░╚═╝█████═╝░  ╚█████╗░░░░██║░░░██║░░░██║██║░░██║██║██║░░██║╚█████╗░
+╚██████╔╝██║░░░██║██╔══██║██║░░██╗██╔═██╗░  ░╚═══██╗░░░██║░░░██║░░░██║██║░░██║██║██║░░██║░╚═══██╗
+░╚═██╔═╝░╚██████╔╝██║░░██║╚█████╔╝██║░╚██╗  ██████╔╝░░░██║░░░╚██████╔╝██████╔╝██║╚█████╔╝██████╔╝
+░░░╚═╝░░░░╚═════╝░╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝  ╚═════╝░░░░╚═╝░░░░╚═════╝░╚═════╝░╚═╝░╚════╝░╚═════╝░
+
+Written by : @xmxtoon
+
+QuackStudios All Rights Reserved
+
+Basically a combine all function <3
+]]--
+local _L = require(game.ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Library"))
+while (not _L.Loaded) do  game:GetService("RunService").Heartbeat:Wait()  end
+
+function GetTotalPoints(plr)
+	local points = 0
+	local UIDS = {}
+	local save = _L.Saving.Get(plr)
+	if not save then return false end
+	
+	for _, pet in ipairs(save.Pets) do
+		local PetDir = _L.Directory.Pets[pet.id]
+		if PetDir.companionEnchantLevel then
+			points += PetDir.companionEnchantLevel
+			table.insert(UIDS, pet.uid)
+		end
+	end
+	
+	return points, UIDS
+end
+
+
+_L.Network.Invoked("Huge Machine : Combine All").OnInvoke = function(plr)
+	
+	local points, uids = GetTotalPoints(plr)
+	
+	local amountEggs = math.round(points/100)
+	if amountEggs <1 then
+		return 
+	end
+	
+	for _, uid in pairs(uids) do
+		_L.Pets.Delete(uid)
+	end
+
+	
+	for i = 1, amountEggs do
+		_L.Pets.Create(plr, "Huge Machine Release Egg")
+	end
+	
+	print(points, uids)
+end
