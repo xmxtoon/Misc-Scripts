@@ -1,0 +1,134 @@
+-- CombineOMatic.lua
+--[[
+░██████╗░██╗░░░██╗░█████╗░░█████╗░██╗░░██╗  ░██████╗████████╗██╗░░░██╗██████╗░██╗░█████╗░░██████╗
+██╔═══██╗██║░░░██║██╔══██╗██╔══██╗██║░██╔╝  ██╔════╝╚══██╔══╝██║░░░██║██╔══██╗██║██╔══██╗██╔════╝
+██║██╗██║██║░░░██║███████║██║░░╚═╝█████═╝░  ╚█████╗░░░░██║░░░██║░░░██║██║░░██║██║██║░░██║╚█████╗░
+╚██████╔╝██║░░░██║██╔══██║██║░░██╗██╔═██╗░  ░╚═══██╗░░░██║░░░██║░░░██║██║░░██║██║██║░░██║░╚═══██╗
+░╚═██╔═╝░╚██████╔╝██║░░██║╚█████╔╝██║░╚██╗  ██████╔╝░░░██║░░░╚██████╔╝██████╔╝██║╚█████╔╝██████╔╝
+░░░╚═╝░░░░╚═════╝░╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝  ╚═════╝░░░░╚═╝░░░░╚═════╝░╚═════╝░╚═╝░╚════╝░╚═════╝░
+
+Written by : @xmxtoon
+
+QuackStudios All Rights Reserved
+]]--
+local _L = require(game.ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Library"))
+while (not _L.Loaded) do  game:GetService("RunService").Heartbeat:Wait()  end
+
+
+function HasPet(Pets, petbeingrequested: string, rarity)
+	local count = 0
+
+	for _, pet in ipairs(Pets) do
+		if pet.id == petbeingrequested then
+			if rarity == "Golden" then
+				if not pet.r and not pet.sh and not pet.g then
+					count += 1
+				end
+			elseif rarity == "Rainbow" then
+				if not pet.g and not pet.sh and not pet.r then
+					count += 1
+				end
+			elseif rarity == "Shiny" then
+				if not pet.r and not pet.g and not pet.sh then
+					count += 1
+				end
+			else
+				if not pet.r and not pet.g and not pet.sh then
+					count += 1
+				end
+			end
+		end
+	end
+	return count
+end
+
+function Convert(plr, Pets, amttobedeleted: number, petname: string, pettobecreated: string, rarity: string)
+	warn(plr, Pets, amttobedeleted, petname, pettobecreated)
+	local coUnt = 0
+
+	if HasPet(Pets, petname, rarity) < amttobedeleted then
+		return false, "You do not have enough pets!"
+	end
+
+	local rb, gold, shiny = nil, nil, nil
+	if rarity == "Golden" then
+		gold = true
+	elseif rarity == "Rainbow" then
+		rb = true
+	elseif rarity == "Shiny" then
+		shiny = true
+	end
+
+	for i = #Pets, 1, -1 do
+		local pet = Pets[i]
+		if pet.id == petname then
+			if rarity == "Golden" then
+				if not pet.r and not pet.sh and pet.g then
+					_L.Pets.Delete(pet.uid)
+					coUnt += 1
+				end
+			elseif rarity == "Rainbow" then
+				if pet.r and not pet.sh and not pet.g then
+					_L.Pets.Delete(pet.uid)
+					coUnt += 1
+				end
+			elseif rarity == "Shiny" then
+				if not pet.r and not pet.g and pet.sh then
+					_L.Pets.Delete(pet.uid)
+					coUnt += 1
+				end
+			else
+				if not pet.r and not pet.g and not pet.sh then
+					_L.Pets.Delete(pet.uid)
+					coUnt += 1
+				end
+			end
+
+			if coUnt >= amttobedeleted then
+				
+				if rb then
+					_L.Pets.Create(plr, pettobecreated, {r = true})
+				elseif gold then
+					_L.Pets.Create(plr, pettobecreated, {g = true})
+				elseif shiny then
+					_L.Pets.Create(plr, pettobecreated, {sh = true})
+				else
+					_L.Pets.Create(plr, pettobecreated)
+				end
+				
+				--if pettobecreated:match("Huge") or pettobecreated:match("Titanic") then
+					
+				--	_L.Eggs.Open(plr, "Cracked Egg", 1, {{pettobecreated, 100}}, { r = rb, g = gold, sh = shiny }, "Cracked Egg", true)
+				--else
+				--	_L.Pets.Create(plr, pettobecreated)
+				--end
+				break
+			end
+		end
+		continue
+	end
+	
+	return true, "Success!"
+end
+
+_L.Network.Invoked("Get Pet Amount").OnInvoke = function(plr, save, petname)
+	return HasPet(save, petname)
+end
+
+_L.Network.Invoked("Combine O Matic : Convert").OnInvoke = function(plr, pets, number, petname, pettobecreated, rarity)
+	if not plr or not pets or not number or not petname or not pettobecreated then
+		return false, "Invalid data received"
+	end
+
+	return Convert(plr, pets, number, petname, pettobecreated, rarity)
+end
+
+--_L.Signal.Fired("Player Added"):Connect(function(plr)
+--	local save = _L.Saving.Get(plr)
+
+--	for i = 1, 25 do
+--		_L.Pets.Create(plr, "Pixel Demon")
+--		_L.Pets.Create(plr, "Pixel Wolf")
+--		_L.Pets.Create(plr, "Huge Pixel Shark")
+--	end
+--end)
