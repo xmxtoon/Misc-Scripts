@@ -1,0 +1,204 @@
+--[[
+
+░██████╗░██╗░░░██╗░█████╗░░█████╗░██╗░░██╗  ░██████╗████████╗██╗░░░██╗██████╗░██╗░█████╗░░██████╗
+██╔═══██╗██║░░░██║██╔══██╗██╔══██╗██║░██╔╝  ██╔════╝╚══██╔══╝██║░░░██║██╔══██╗██║██╔══██╗██╔════╝
+██║██╗██║██║░░░██║███████║██║░░╚═╝█████═╝░  ╚█████╗░░░░██║░░░██║░░░██║██║░░██║██║██║░░██║╚█████╗░
+╚██████╔╝██║░░░██║██╔══██║██║░░██╗██╔═██╗░  ░╚═══██╗░░░██║░░░██║░░░██║██║░░██║██║██║░░██║░╚═══██╗
+░╚═██╔═╝░╚██████╔╝██║░░██║╚█████╔╝██║░╚██╗  ██████╔╝░░░██║░░░╚██████╔╝██████╔╝██║╚█████╔╝██████╔╝
+░░░╚═╝░░░░╚═════╝░╚═╝░░╚═╝░╚════╝░╚═╝░░╚═╝  ╚═════╝░░░░╚═╝░░░░╚═════╝░╚═════╝░╚═╝░╚════╝░╚═════╝░
+
+Written by : @xmxtoon
+
+QuackStudios All Rights Reserved
+
+Contents : Most of a christmas event (i never finished all, everything in here is working though)
+]]--
+
+local _L = require(game.ReplicatedStorage:WaitForChild("Framework"):WaitForChild("Library"))
+while (not _L.Loaded) do  
+	game:GetService("RunService").Heartbeat:Wait()  
+end
+local Quests = {
+	[1] = {
+		name = "Christmas Event 2024 Quest #1",
+		description = "Collect 5 Bundles",
+		Amount = 5,
+		rewards = { Gingerbread = 200_000 }
+	},
+	[2] = {
+		name = "Christmas Event 2024 Quest #2",
+		description = "Hatch 200 Snow Eggs!",
+		Amount = 200,
+		rewards = { Pet = "Rudolf? idk", Gingerbread = 500_000, Diamonds = 100_000 }
+	},
+	[3] = {
+		name = "Christmas Event 2024 Quest #3",
+		description = "Hatch ANY Huge Pet!",
+		Amount = 1,
+		rewards = { Pet = "Huge Snowman", PetRainbow = _L.Functions.Lottery( {false, 90}, {true, 10} ) }
+	},
+	[4] = {
+		name = "Christmas Event 2024 Quest #4",
+		description = "Collect 40 Bundles!",
+		Amount = 40,
+		rewards = { Diamonds = 450_000 }
+	},
+	[5] = {
+		name = "Christmas Event 2024 Quest #5",
+		description = "Hatch 25 Snowmen",
+		Amount = 25,
+		rewards = { Gingerbread = 6_000_000 }
+	},
+	[6] = {
+		name = "Christmas Event 2024 Quest #6",
+		description = "Open 1000 Snow Eggs",
+		Amount = 1000,
+		rewards = { Pet = "Huge Jolly Narwhal", PetRainbow = _L.Functions.Lottery( {false, 90}, {true, 10} ), Gingerbread = 15_000_000, Diamonds = 1_000_000 }
+	},
+	[7] = {
+		name = "Christmas Event 2024 Quest #7",
+		description = "Hatch ANY Titanic Pet...",
+		Amount = 1,
+		rewards = { Pet = "Titanic Cheerful Yeti", Gingerbread = 50_000_000, PetRainbow = _L.Functions.Lottery( {false, 90}, {true, 10} ) }
+	},
+}
+
+
+
+function StartNewQuest(plr, Questnumber)
+	local save = _L.Saving.Get(plr)
+	if not save then return false end
+
+	local typeofquest = function(QuestNumber)
+		if QuestNumber == 1 or QuestNumber == 2 or QuestNumber == 4 or QuestNumber == 5 or QuestNumber == 6 then
+			return true
+		end
+		return false
+	end
+
+	if typeofquest(Questnumber) then
+	 save.Christmas2024QuestProgress = 0
+	else 
+	save.Christmas2024QuestProgress = false	
+	end
+end
+
+function UpdateQuests(plr, QuestNumber)
+	local save = _L.Saving.Get(plr)
+	if not save then return false end
+
+	if QuestNumber < 1 then
+		return false
+	end
+
+	local typeofquest = function(QuestNumber)
+		if QuestNumber == 1 or QuestNumber == 2 or QuestNumber == 4 or QuestNumber == 5 or QuestNumber == 6 then
+			return true
+		end
+		return false
+	end
+
+	if typeofquest(QuestNumber) then
+		save.Christmas2024QuestProgress = (save.Christmas2024QuestProgress or 0) + 1
+		if save.Christmas2024QuestProgress >= Quests[QuestNumber].Amount then
+			CompleteQuest(plr, QuestNumber)
+		end
+		return true
+	else
+		if not typeofquest(QuestNumber) then
+			save.Christmas2024QuestProgress = true
+			CompleteQuest(plr, QuestNumber)
+			return true
+		end
+	end
+	_L.Network.Fire("Christmas 2024 : Update Quest Signs", plr)
+	return false
+end
+
+function CompleteQuest(plr, QuestNumber)
+	local save = _L.Saving.Get(plr)
+	if not save then return false end
+
+	if QuestNumber < 1 then
+		return false, "Invalid Quest Number! If this error persists contact @xmxtoon on discord."
+	end
+
+	local QuestHasPet = Quests[QuestNumber].rewards.Pet ~= nil
+	local QuestHasGingerbread = Quests[QuestNumber].rewards.Gingerbread ~= nil
+	local QuestHasDiamonds = Quests[QuestNumber].rewards.Diamonds ~= nil
+	if QuestHasPet then
+		local petOptions = {}
+		if Quests[QuestNumber].rewards.PetRainbow then
+			petOptions.r = Quests[QuestNumber].rewards.PetRainbow
+		end
+		_L.Pets.Create(plr, Quests[QuestNumber].rewards.Pet, petOptions)
+	elseif QuestHasGingerbread then
+		save.Gingerbread = (save.Gingerbread or 0) + Quests[QuestNumber].rewards.Gingerbread
+	elseif QuestHasDiamonds then
+		save.Diamonds = (save.Diamonds or 0) + Quests[QuestNumber].rewards.Diamonds
+	end
+
+	save.Christmas2024QuestNumber = (save.Christmas2024QuestNumber or 0) + 1
+	if save.Christmas2024QuestNumber == 8 then
+		save.DoneChristmas2024Quests = true
+	else
+		save.Christmas2024QuestProgress = 0
+		StartNewQuest(plr, save.Christmas2024QuestNumber)
+	end
+
+	return true
+end
+
+function CalcProgress(plr)
+	local save = _L.Saving.Get(plr)
+	if not save then return false end
+	local QuestNumber = save.Christmas2024QuestNumber or 1
+	local QuestAmount = Quests[QuestNumber].Amount
+	local QuestDescription = Quests[QuestNumber].description
+	local QuestAmountDone = save.Christmas2024QuestProgress
+	if  QuestDescription:match("Pet") then
+		return "1"
+	else
+		return QuestAmountDone.."/"..QuestAmount
+	end
+	
+end
+	
+
+_L.Network.Invoked("Christmas 2024 : Get Current Quest Data").OnInvoke = function(plr)
+	local save = _L.Saving.Get(plr)
+	if not save then return false end
+
+	local QuestNumber = save.Christmas2024QuestNumber or 1
+
+	local QuestName = Quests[QuestNumber].name
+	local QuestDescription = Quests[QuestNumber].description
+	local QuestRewards = Quests[QuestNumber].rewards
+	local QuestProgress = CalcProgress(plr)
+
+	return QuestName, QuestDescription, QuestProgress, QuestRewards
+end
+
+_L.Signal.Invoked("Christmas 2024: Bundle Gotten").OnInvoke = function(plr)
+	local save = _L.Saving.Get(plr)
+	if not save then return false end
+	UpdateQuests(plr, save.Christmas2024QuestNumber)
+	
+end
+
+_L.Signal.Invoked("Christmas 2024: Egg Hatched").OnInvoke = function(plr)
+	local save = _L.Saving.Get(plr)
+	if not save then return false end
+	UpdateQuests(plr, save.Christmas2024QuestNumber)
+	_L.Network.Fire("Christmas 2024 : Update Quest Signs", plr)
+end
+
+_L.Signal.Invoked("Christmas 2024 Huge/Titanic Hatched").OnInvoke = function(plr)
+	local save = _L.Saving.Get(plr)
+	if not save then return false end
+	CompleteQuest(plr, save.Christmas2024QuestNumber)
+end
+
+-- done with quests!!!!!
+
+
