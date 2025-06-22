@@ -1,0 +1,19 @@
+-- Relics.lua
+
+local Network = require(game.ReplicatedStorage.Modules.Network)
+local PlayerDataManager = require(script.Parent.Modules.PlayerDataManager) 
+
+Network.Invoked("Discover Relic", function(Player, RelicType, ID)
+	local PlayerData = PlayerDataManager.Get(Player)
+	if not PlayerData then
+		return false, "Error fetching the player's data!"
+	end
+	
+	if table.find(PlayerData.DiscoveredRelics, ID) then
+		return false, "You already have found this relic!"
+	end
+	
+	table.insert(PlayerData.DiscoveredRelics, ID)
+	PlayerDataManager.SaveData(Player.UserId, PlayerData)
+	return true, "Succesfully found relic!"
+end)
