@@ -1,0 +1,35 @@
+-- @xmx Starters 2025
+-- made for fun, none of this would work in my framework (easily changable to ur game!)
+-- Starters.lua
+local Network = require(game.ReplicatedStorage.Modules.Network)
+local PlayerDataManager = require(script.Parent.Modules.PlayerDataManager) 
+
+
+function ValidatePet(PetName)
+	return typeof(PetName) ~= "string"
+	-- if this is wanted to be made better make this linked to the pet directory! as this file doesnt have one its not using 1
+end
+
+Network.Invoked("Pick Starter", function(Player, Pet1, Pet2)
+	local PlayerData = PlayerDataManager.Get(Player)
+	if not PlayerData then
+		return false, "Error fetching the player's data!"
+	end
+	
+	if not ValidatePet(Pet1) or not ValidatePet(Pet2) then
+		return false, "Failed to validate requested pets!"
+	end
+	
+	if PlayerData.PickedStarter then
+		return false, "You have already chosen your starters!"
+	end
+	
+	PlayerData.StarterA = Pet1
+	PlayerData.StarterB = Pet2
+	PlayerData.PickedStarter = true
+	-- add your pet creation logic!
+	PlayerDataManager.SaveData(Player.UserId, PlayerData)
+	
+	return true, "Success!"
+end)
+
